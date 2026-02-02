@@ -1,92 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Valentine 💖</title>
- 
+
 <style>
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: #f7c6d0;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  body{
+    margin:0;
+    min-height:100vh;
+    background:#f7c6d0;
+    font-family:Arial, sans-serif;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
   }
 
-  .card {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    text-align: center;
-    width: 330px;
-    position: relative;
-    z-index: 10;
+  .card{
+    background:#fff;
+    padding:26px;
+    border-radius:20px;
+    text-align:center;
+    width:340px;
+    position:relative;
+    z-index:10;
+    box-shadow:0 12px 30px rgba(0,0,0,0.12);
   }
 
-  .buttons {
-    position: relative;
-    height: 160px;
-    margin-top: 30px;
+  /* Minion video on the Yes/No page */
+  .minion-wrap{
+    width:260px;
+    height:170px;
+    margin:0 auto 10px auto;
+    border-radius:16px;
+    overflow:hidden;
+    background:#00000010;
   }
 
-  button {
-    padding: 12px 28px;
-    font-size: 18px;
-    border-radius: 30px;
-    border: none;
-    cursor: pointer;
-    position: absolute;
+  .minion-wrap video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
   }
 
-  #yes {
-    background: #ff4d6d;
-    color: white;
-    left: 40px;
-    bottom: 20px;
+  .buttons{
+    position:relative;
+    height:180px;
+    margin-top:15px;
+    border-radius:16px;
+    background:rgba(255,77,109,0.08);
+    overflow:hidden;
   }
 
-  #no {
-    background: #ddd;
-    left: 180px;
-    bottom: 20px;
+  button{
+    padding:12px 28px;
+    font-size:18px;
+    border-radius:30px;
+    border:none;
+    cursor:pointer;
+    position:absolute;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+
+    /* smooth movement */
+    transition:left 0.22s ease, top 0.22s ease, transform 0.12s ease;
   }
 
-  #result {
-    display: none;
+  #yes{
+    background:#ff4d6d;
+    color:#fff;
+    left:40px;
+    top:105px;
   }
 
-  #result img {
-    width: 100%;
-    border-radius: 16px;
-    margin-top: 15px;
+  #no{
+    background:#ddd;
+    left:185px;
+    top:105px;
   }
 
-  #result h2 {
-    color: #ff4d6d;
-    margin-top: 20px;
+  #result{ display:none; }
+  #result img{
+    width:100%;
+    border-radius:16px;
+    margin-top:15px;
+  }
+  #result h2{
+    color:#ff4d6d;
+    margin-top:20px;
   }
 
   /* Floating hearts */
-  .heart {
-    position: fixed;
-    bottom: -10px;
-    font-size: 20px;
-    animation: floatUp 6s linear infinite;
-    opacity: 0.8;
+  .heart{
+    position:fixed;
+    bottom:-10px;
+    font-size:20px;
+    animation:floatUp 6s linear infinite;
+    opacity:0.85;
+    pointer-events:none;
   }
-
-  @keyframes floatUp {
-    from {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateY(-100vh);
-      opacity: 0;
-    }
+  @keyframes floatUp{
+    from{ transform:translateY(0); opacity:1; }
+    to{ transform:translateY(-100vh); opacity:0; }
   }
 </style>
 </head>
@@ -96,18 +113,25 @@
 <div class="card">
   <h2 id="question">Will you be my Valentine? 💖</h2>
 
+  <!-- ✅ Minion video appears on Yes/No page -->
+  <div class="minion-wrap" id="minionWrap">
+    <video id="minionVideo" autoplay muted loop playsinline preload="auto">
+      <source src="./minion.mp4" type="video/mp4">
+    </video>
+  </div>
+
   <div class="buttons" id="buttons">
     <button id="yes">Yes</button>
     <button id="no">No</button>
   </div>
 
   <div id="result">
-    <h2>I love you so much lolelty❤️</h2>
-    <img src="love.jpg" alt="Us together">
+    <h2>I love you so much lolelty ❤️</h2>
+    <img src="./love.jpg" alt="Us together">
   </div>
 </div>
 
-<audio id="music" src="kol-hayaty.mp3"></audio>
+<audio id="music" src="./kol-hayaty.mp3" preload="auto"></audio>
 
 <script>
   const noBtn = document.getElementById("no");
@@ -116,48 +140,114 @@
   const result = document.getElementById("result");
   const question = document.getElementById("question");
   const music = document.getElementById("music");
+  const minionWrap = document.getElementById("minionWrap");
+  const minionVideo = document.getElementById("minionVideo");
 
-  function moveNo() {
-    const x = Math.random() * 140;
-    const y = Math.random() * 100;
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+  // ✅ Make sure video starts on phones (autoplay can be blocked sometimes)
+  document.addEventListener("click", () => {
+    if (minionVideo && minionVideo.paused) {
+      minionVideo.play().catch(()=>{});
+    }
+  }, { once:true });
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  function moveNoAwayFrom(pointerX, pointerY){
+    const area = buttons.getBoundingClientRect();
+
+    const noW = noBtn.offsetWidth;
+    const noH = noBtn.offsetHeight;
+
+    const pad = 10;
+    const maxX = area.width - noW - pad;
+    const maxY = area.height - noH - pad;
+
+    // current center of NO
+    const noCenterX = noBtn.offsetLeft + noW/2;
+    const noCenterY = noBtn.offsetTop + noH/2;
+
+    // direction away from pointer
+    const dx = noCenterX - pointerX;
+    const dy = noCenterY - pointerY;
+
+    // push distance
+    const pushX = (dx >= 0 ? 1 : -1) * (70 + Math.random()*60);
+    const pushY = (dy >= 0 ? 1 : -1) * (50 + Math.random()*50);
+
+    let newX = noBtn.offsetLeft + pushX;
+    let newY = noBtn.offsetTop + pushY;
+
+    // add little randomness
+    newX += (Math.random()*40 - 20);
+    newY += (Math.random()*30 - 15);
+
+    newX = clamp(newX, pad, maxX);
+    newY = clamp(newY, pad, maxY);
+
+    noBtn.style.left = newX + "px";
+    noBtn.style.top  = newY + "px";
+
+    // tiny wiggle
+    noBtn.style.transform = "scale(1.03)";
+    setTimeout(()=> noBtn.style.transform = "scale(1)", 120);
   }
 
-  noBtn.addEventListener("mouseover", moveNo);
-  noBtn.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    moveNo();
+  // ✅ Works on desktop
+  buttons.addEventListener("mousemove", (e) => {
+    const rect = buttons.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const nx = noBtn.offsetLeft + noBtn.offsetWidth/2;
+    const ny = noBtn.offsetTop + noBtn.offsetHeight/2;
+
+    const dist = Math.hypot(mx - nx, my - ny);
+
+    if (dist < 100) moveNoAwayFrom(mx, my);
+  });
+
+  // ✅ Works on mobile (touch)
+  buttons.addEventListener("touchmove", (e) => {
+    const rect = buttons.getBoundingClientRect();
+    const t = e.touches[0];
+    const mx = t.clientX - rect.left;
+    const my = t.clientY - rect.top;
+
+    const nx = noBtn.offsetLeft + noBtn.offsetWidth/2;
+    const ny = noBtn.offsetTop + noBtn.offsetHeight/2;
+
+    const dist = Math.hypot(mx - nx, my - ny);
+
+    if (dist < 120) moveNoAwayFrom(mx, my);
+  }, { passive:true });
+
+  // extra: if they tap NO, it escapes
+  noBtn.addEventListener("click", () => {
+    moveNoAwayFrom(0, 0);
   });
 
   yesBtn.addEventListener("click", () => {
     buttons.style.display = "none";
     question.style.display = "none";
+    minionWrap.style.display = "none";
     result.style.display = "block";
 
-    music.play();
+    music.play().catch(()=>{});
     startHearts();
   });
 
-  function startHearts() {
+  function startHearts(){
     setInterval(() => {
       const heart = document.createElement("div");
       heart.className = "heart";
-      heart.innerHTML = "❤️";
-      heart.style.left = Math.random() * 100 + "vw";
-      heart.style.fontSize = Math.random() * 20 + 15 + "px";
+      heart.textContent = "❤️";
+      heart.style.left = Math.random()*100 + "vw";
+      heart.style.fontSize = (Math.random()*20 + 15) + "px";
       document.body.appendChild(heart);
-
-
-     
-      setTimeout(() => heart.remove(), 6000);
+      setTimeout(()=>heart.remove(), 6000);
     }, 300);
   }
 </script>
-  <!-- trigger rebuild -->
 
 </body>
-
 </html>
-
-
