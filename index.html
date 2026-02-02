@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Valentine 💖</title>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #f7c6d0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    width: 330px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .buttons {
+    position: relative;
+    height: 160px;
+    margin-top: 30px;
+  }
+
+  button {
+    padding: 12px 28px;
+    font-size: 18px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+  }
+
+  #yes {
+    background: #ff4d6d;
+    color: white;
+    left: 40px;
+    bottom: 20px;
+  }
+
+  #no {
+    background: #ddd;
+    left: 180px;
+    bottom: 20px;
+  }
+
+  #result {
+    display: none;
+  }
+
+  #result img {
+    width: 100%;
+    border-radius: 16px;
+    margin-top: 15px;
+  }
+
+  #result h2 {
+    color: #ff4d6d;
+    margin-top: 20px;
+  }
+
+  /* Floating hearts */
+  .heart {
+    position: fixed;
+    bottom: -10px;
+    font-size: 20px;
+    animation: floatUp 6s linear infinite;
+    opacity: 0.8;
+  }
+
+  @keyframes floatUp {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-100vh);
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2 id="question">Will you be my Valentine? 💖</h2>
+
+  <div class="buttons" id="buttons">
+    <button id="yes">Yes</button>
+    <button id="no">No</button>
+  </div>
+
+  <div id="result">
+    <h2>I love you so much lolelty❤️</h2>
+    <img src="love.jpg" alt="Us together">
+  </div>
+</div>
+
+<audio id="music" src="kol-hayaty.mp3"></audio>
+
+<script>
+  const noBtn = document.getElementById("no");
+  const yesBtn = document.getElementById("yes");
+  const buttons = document.getElementById("buttons");
+  const result = document.getElementById("result");
+  const question = document.getElementById("question");
+  const music = document.getElementById("music");
+
+  function moveNo() {
+    const x = Math.random() * 140;
+    const y = Math.random() * 100;
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+  }
+
+  noBtn.addEventListener("mouseover", moveNo);
+  noBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    moveNo();
+  });
+
+  yesBtn.addEventListener("click", () => {
+    buttons.style.display = "none";
+    question.style.display = "none";
+    result.style.display = "block";
+
+    music.play();
+    startHearts();
+  });
+
+  function startHearts() {
+    setInterval(() => {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.innerHTML = "❤️";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.fontSize = Math.random() * 20 + 15 + "px";
+      document.body.appendChild(heart);
+
+      setTimeout(() => heart.remove(), 6000);
+    }, 300);
+  }
+</script>
+
+</body>
+</html>
